@@ -180,6 +180,7 @@ export default {
   },
   mounted () {
     this.getMap()
+    this.startUpdatingLocation()
   },
   methods: {
     onNavClick(index) {
