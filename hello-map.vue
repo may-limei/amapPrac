@@ -1,7 +1,7 @@
 <template>
   <div id="detail">
     <mx-header :title="$route.meta.title"></mx-header>
-    <div class="content">
+    <div class="content" style="background-color: #FFFFFF;">
       <!-- <tabs v-model="selected" v-if="tabbarSelect===0">
         <tab title="文档">
           <mx-loadmore
@@ -33,32 +33,82 @@
           <van-collapse-item title="中心点" name="3">内容</van-collapse-item>
         </van-collapse>
       </div>
-      <div class="amap"
-          id="defaultMapContainer"
-          v-show="(tabbarSelect===2)">
+      <div class="amap" id="defaultMapContainer" v-show="(tabbarSelect===2)">
         <div class="cur-position"
             v-if='curPositionShow'
             @click="curPosition">
         </div>
       </div>
-      <div class="btn-list" v-show="(tabbarSelect===2)">
-        <div class="demo-btn"
-                @click="startUpdatingLocation">开启定位</div>
-        <div class="demo-btn"
-                @click="stopLocation">结束定位</div> <br/>
-        <div class="demo-btn"
-                 @click="getToolBar">显示缩放工具条</div>
-        <div class="demo-btn"
-                @click="curPositionShow = !curPositionShow">显示／隐藏定位按钮</div><br/>
-        <div class="demo-btn"
-                @click="setDemoPoint()">设置中心点</div>
-        <div class="demo-btn"
-                @click="setMarker({longitude: 116.2312,latitude: 39.54,pointName: '测试地点'}, 1)">设置点标记</div><br/>
-        <div class="demo-btn"
-                @click="setCircle(116.23, 39.54)">设置范围圈</div>
-        <div class="demo-btn"
-                @click="openInfoWindow">显示信息窗</div>
-      </div>
+      <van-collapse v-model="activeNames2" v-show="(tabbarSelect===2)">
+        <van-collapse-item title="功能" name="1">
+          <van-tree-select
+            :items="items"
+            :main-active-index="mainActiveIndex"
+            :active-id="activeId"
+            @navclick="onNavClick"
+            @itemclick="onItemClick"
+          />
+        </van-collapse-item>
+        <van-collapse-item title="案例" name="2">
+          <div class="btn-list">
+            <div class="demo-btn"
+                    @click="startUpdatingLocation">开启定位</div>
+            <div class="demo-btn"
+                    @click="stopLocation">结束定位</div> <br/>
+            <div class="demo-btn"
+                    @click="getToolBar">显示缩放工具条</div>
+            <div class="demo-btn"
+                    @click="curPositionShow = !curPositionShow">显示／隐藏定位按钮</div><br/>
+            <div class="demo-btn"
+                    @click="setDemoPoint()">设置中心点</div>
+            <div class="demo-btn"
+                    @click="setMarker({longitude: 116.2312,latitude: 39.54,pointName: '测试地点'}, 1)">设置点标记</div><br/>
+            <div class="demo-btn"
+                    @click="setCircle(116.23, 39.54)">设置范围圈</div>
+            <div class="demo-btn"
+                  @click="openInfoWindow">显示信息窗</div>
+          </div>
+        </van-collapse-item>
+      </van-collapse>
+      <!-- <div v-show="(tabbarSelect===2)">
+        <div class="amap" id="defaultMapContainer" style="position: fixed; top: 0.44rem; height: 2.56rem;">
+          <div class="cur-position"
+              v-if='curPositionShow'
+              @click="curPosition">
+          </div>
+        </div>
+        <van-collapse style="margin-top: 50%" v-model="activeNames2" v-show="(tabbarSelect===2)">
+          <van-collapse-item title="功能" name="1">
+            <van-tree-select
+              :items="items"
+              :main-active-index="mainActiveIndex"
+              :active-id="activeId"
+              @navclick="onNavClick"
+              @itemclick="onItemClick"
+            />
+          </van-collapse-item>
+          <van-collapse-item title="案例" name="2">
+            <div class="btn-list">
+              <div class="demo-btn"
+                      @click="startUpdatingLocation">开启定位</div>
+              <div class="demo-btn"
+                      @click="stopLocation">结束定位</div> <br/>
+              <div class="demo-btn"
+                      @click="getToolBar">显示缩放工具条</div>
+              <div class="demo-btn"
+                      @click="curPositionShow = !curPositionShow">显示／隐藏定位按钮</div><br/>
+              <div class="demo-btn"
+                      @click="setDemoPoint()">设置中心点</div>
+              <div class="demo-btn"
+                      @click="setMarker({longitude: 116.2312,latitude: 39.54,pointName: '测试地点'}, 1)">设置点标记</div><br/>
+              <div class="demo-btn"
+                      @click="setCircle(116.23, 39.54)">设置范围圈</div>
+              <div class="demo-btn"
+                      @click="openInfoWindow">显示信息窗</div>
+            </div>
+          </van-collapse-item>
+        </van-collapse>
+      </div> -->
       <tabbar v-model="tabbarSelect" :fixed="true" active-color="#07c160">
         <tabbar-item icon="description">文档</tabbar-item>
         <tabbar-item icon="search">搜索</tabbar-item>
@@ -74,8 +124,36 @@ import { Tabbar, TabbarItem } from 'vant'
 export default {
   data () {
     return {
+      items: [{
+        text: '地图属性',
+        children: [
+          { text: '中/英文地图', id: 1 },
+          { text: '地图中心点', id: 2 },
+          { text: '当地行政区', id: 3 },
+          { text: '地图显示范围', id: 4 },
+          { text: '点击获取经纬度', id: 5 },
+          { text: '设置鼠标样式', id: 6 },
+          { text: '显示缩放工具条', id: 7 }]
+      },
+      {
+        text: '定位',
+        children: [
+          { text: '显示定位图标', id: 1 },
+          { text: 'IP城市定位', id: 2 },
+          { text: '浏览器精确定位', id: 3 }]
+      },
+      {
+        text: '服务',
+        children: [
+          { text: '定位', id: 1 },
+          { text: '天气预报', id: 2 },
+          { text: '行政区划查询', id: 3 }]
+      }],
+      mainActiveIndex: 0, // 左侧高亮元素的index
+      activeId: 1, // 被选中元素的id
       activeNames0: ['10'],
       activeNames1: ['9'],
+      activeNames2: ['9'],
       tabbarSelect: 2,
       mapObj: null,
       canLI: false,
@@ -104,6 +182,12 @@ export default {
     this.getMap()
   },
   methods: {
+    onNavClick(index) {
+      this.mainActiveIndex = index
+    },
+    onItemClick(data) {
+      this.activeId = data.id
+    },
     startUpdatingLocation () {
       let _self = this
       this.mapObj.plugin('AMap.Geolocation', function () {
