@@ -14,7 +14,7 @@ import Vue from 'vue'
 import FastClick from 'fastclick'
 import mxLoading from '@/components/mx-loading/index' // 加载组件引入
 import mxIcon from '@/components/mx-icon/index' // 字体图标组件引入
-import { Dialog, Toast, Collapse, CollapseItem, TreeSelect } from 'vant' // 弹框组件引入
+import { Dialog, Toast, Collapse, CollapseItem, TreeSelect, Button, Row, Col, RadioGroup, Radio } from 'vant' // 弹框组件引入
 
 // 全局注入加载、弹框、字体组件
 Vue.use(Toast)
@@ -22,6 +22,11 @@ Vue.use(Dialog)
 Vue.use(mxLoading)
 Vue.use(Collapse).use(CollapseItem)
 Vue.use(TreeSelect)
+Vue.use(Button)
+Vue.use(Row)
+Vue.use(Col)
+Vue.use(RadioGroup)
+Vue.use(Radio)
 Vue.component('mx-icon', mxIcon)
 // Toast.allowMultiple() // 设置为允许多个toast一起展示
 Toast.setDefaultOptions({
