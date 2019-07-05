@@ -50,65 +50,30 @@
           />
         </van-collapse-item>
         <van-collapse-item title="案例" name="2">
-          <div class="btn-list">
-            <div class="demo-btn"
-                    @click="startUpdatingLocation">开启定位</div>
-            <div class="demo-btn"
-                    @click="stopLocation">结束定位</div> <br/>
-            <div class="demo-btn"
-                    @click="getToolBar">显示缩放工具条</div>
-            <div class="demo-btn"
-                    @click="curPositionShow = !curPositionShow">显示／隐藏定位按钮</div><br/>
-            <div class="demo-btn"
-                    @click="setDemoPoint()">设置中心点</div>
-            <div class="demo-btn"
-                    @click="setMarker({longitude: 116.2312,latitude: 39.54,pointName: '测试地点'}, 1)">设置点标记</div><br/>
-            <div class="demo-btn"
-                    @click="setCircle(116.23, 39.54)">设置范围圈</div>
-            <div class="demo-btn"
-                  @click="openInfoWindow">显示信息窗</div>
-          </div>
+          <div class="demo-btn" @click="startUpdatingLocation">开启定位</div>
+          <div class="demo-btn" @click="showLocation">显示／隐藏定位按钮</div>
         </van-collapse-item>
-      </van-collapse>
-      <!-- <div v-show="(tabbarSelect===2)">
-        <div class="amap" id="defaultMapContainer" style="position: fixed; top: 0.44rem; height: 2.56rem;">
-          <div class="cur-position"
-              v-if='curPositionShow'
-              @click="curPosition">
-          </div>
+        <div class="btn-list">
+          <div class="demo-btn"
+                  @click="startUpdatingLocation">开启定位</div>
+          <div class="demo-btn"
+                  @click="stopLocation">结束定位</div> <br/>
+          <div class="demo-btn"
+                  @click="getToolBar">显示缩放工具条</div>
+          <!-- <div class="demo-btn"
+                  @click="curPositionShow = !curPositionShow">显示／隐藏定位按钮</div><br/> -->
+          <div class="demo-btn"
+                  @click="showLocation">显示／隐藏定位按钮</div><br/>
+          <div class="demo-btn"
+                  @click="setDemoPoint()">设置中心点</div>
+          <div class="demo-btn"
+                  @click="setMarker({longitude: 116.2312,latitude: 39.54,pointName: '测试地点'}, 1)">设置点标记</div><br/>
+          <div class="demo-btn"
+                  @click="setCircle(116.23, 39.54)">设置范围圈</div>
+          <div class="demo-btn"
+                @click="openInfoWindow">显示信息窗</div>
         </div>
-        <van-collapse style="margin-top: 50%" v-model="activeNames2" v-show="(tabbarSelect===2)">
-          <van-collapse-item title="功能" name="1">
-            <van-tree-select
-              :items="items"
-              :main-active-index="mainActiveIndex"
-              :active-id="activeId"
-              @navclick="onNavClick"
-              @itemclick="onItemClick"
-            />
-          </van-collapse-item>
-          <van-collapse-item title="案例" name="2">
-            <div class="btn-list">
-              <div class="demo-btn"
-                      @click="startUpdatingLocation">开启定位</div>
-              <div class="demo-btn"
-                      @click="stopLocation">结束定位</div> <br/>
-              <div class="demo-btn"
-                      @click="getToolBar">显示缩放工具条</div>
-              <div class="demo-btn"
-                      @click="curPositionShow = !curPositionShow">显示／隐藏定位按钮</div><br/>
-              <div class="demo-btn"
-                      @click="setDemoPoint()">设置中心点</div>
-              <div class="demo-btn"
-                      @click="setMarker({longitude: 116.2312,latitude: 39.54,pointName: '测试地点'}, 1)">设置点标记</div><br/>
-              <div class="demo-btn"
-                      @click="setCircle(116.23, 39.54)">设置范围圈</div>
-              <div class="demo-btn"
-                      @click="openInfoWindow">显示信息窗</div>
-            </div>
-          </van-collapse-item>
-        </van-collapse>
-      </div> -->
+      </van-collapse>
       <tabbar v-model="tabbarSelect" :fixed="true" active-color="#07c160">
         <tabbar-item icon="description">文档</tabbar-item>
         <tabbar-item icon="search">搜索</tabbar-item>
@@ -149,11 +114,12 @@ export default {
           { text: '天气预报', id: 2 },
           { text: '行政区划查询', id: 3 }]
       }],
+      openLocationFlag: false, // 定位开启时为true
       mainActiveIndex: 0, // 左侧高亮元素的index
       activeId: 1, // 被选中元素的id
       activeNames0: ['10'],
       activeNames1: ['9'],
-      activeNames2: ['9'],
+      activeNames2: ['1'],
       tabbarSelect: 2,
       mapObj: null,
       canLI: false,
@@ -180,7 +146,7 @@ export default {
   },
   mounted () {
     this.getMap()
-    this.startUpdatingLocation()
+    // this.startUpdatingLocation()
   },
   methods: {
     onNavClick(index) {
@@ -188,27 +154,47 @@ export default {
     },
     onItemClick(data) {
       this.activeId = data.id
+      this.activeNames2 = ['2']
     },
+    /**
+     * 开启定位
+     */
     startUpdatingLocation () {
-      let _self = this
-      this.mapObj.plugin('AMap.Geolocation', function () {
-        let geolocation = new AMap.Geolocation({
-          enableHighAccuracy: true, // 是否使用高精度定位，默认：true
-          timeout: 10000, // 超过10秒后停止定位，默认：无穷大
-          maximumAge: 0, // 定位结果缓存0毫秒，默认：0毫秒
-          showButton: true, // 显示定位按钮，默认：true
-          buttonPosition: 'LB', // 定位按钮停靠位置，默认左下角
-          buttonOffset: new AMap.Pixel(10, 20), // 定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
-          showMarker: true, // 定位成功后在定位到的位置显示点标记，默认：true
-          showCircle: false, // 定位成功后用圆圈表示定位精度范围，默认：true
-          panToLocation: true, // 定位成功后将定位到的位置作为地图中心点，默认：true
-          zoomToAccuracy: false // 定位成功后调整地图视野范围，使定位位置及精度范围视野内可见，默认：false
+      if (!this.openLocationFlag) {
+        let _self = this
+        this.mapObj.plugin('AMap.Geolocation', function () {
+          let geolocation = new AMap.Geolocation({
+            enableHighAccuracy: true, // 是否使用高精度定位，默认：true
+            timeout: 10000, // 超过10秒后停止定位，默认：无穷大
+            maximumAge: 0, // 定位结果缓存0毫秒，默认：0毫秒
+            showButton: true, // 显示定位按钮，默认：true
+            buttonPosition: 'LB', // 定位按钮停靠位置，默认左下角
+            buttonOffset: new AMap.Pixel(10, 20), // 定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+            showMarker: true, // 定位成功后在定位到的位置显示点标记，默认：true
+            showCircle: false, // 定位成功后用圆圈表示定位精度范围，默认：true
+            panToLocation: true, // 定位成功后将定位到的位置作为地图中心点，默认：true
+            zoomToAccuracy: false // 定位成功后调整地图视野范围，使定位位置及精度范围视野内可见，默认：false
+          })
+          _self.mapObj.addControl(geolocation)
+          // geolocation.getCurrentPosition()
+          // AMap.event.addListener(geolocation, 'complete', onComplete) // 返回定位信息
+          // AMap.event.addListener(geolocation, 'error', onError) // 返回定位出错信息
         })
-        _self.mapObj.addControl(geolocation)
-        // geolocation.getCurrentPosition()
-        // AMap.event.addListener(geolocation, 'complete', onComplete) // 返回定位信息
-        // AMap.event.addListener(geolocation, 'error', onError) // 返回定位出错信息
-      })
+        this.openLocationFlag = true
+      } else {
+        // 面包屑提示，已开启定位
+        console.log('已开启定位')
+      }
+    },
+    /**
+     * 显示/隐藏定位图标
+     */
+    showLocation () {
+      let countLocation = document.getElementsByClassName('amap-geo').length // 防止有多个定位控件的情况
+      do {
+        document.getElementsByClassName('amap-geo')[0].style.display = (document.getElementsByClassName('amap-geo')[0].style.display === 'none') ? 'block' : 'none'
+        countLocation--
+      } while (countLocation !== 0)
     },
     /**
      * 关闭定位
