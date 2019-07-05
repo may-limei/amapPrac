@@ -14,19 +14,15 @@
             <cell v-for="n in todo[0].list" :key="n" :title="'tab-container1-item' + n"></cell>
           </mx-loadmore>
         </tab>
-      </tabs> -->
+      </tabs>-->
       <div v-if="tabbarSelect===0">
-        <div class="title">
-          API
-        </div>
+        <div class="title">API</div>
         <van-collapse v-model="activeNames0">
           <van-collapse-item title="属性" name="1">内容</van-collapse-item>
           <van-collapse-item title="方法" name="2">内容</van-collapse-item>
           <van-collapse-item title="事件" name="3">内容</van-collapse-item>
         </van-collapse>
-        <div class="title">
-          使用案例
-        </div>
+        <div class="title">使用案例</div>
         <van-collapse v-model="activeNames1">
           <van-collapse-item title="定位按钮" name="1">内容</van-collapse-item>
           <van-collapse-item title="缩放工具条" name="2">内容</van-collapse-item>
@@ -34,10 +30,7 @@
         </van-collapse>
       </div>
       <div class="amap" id="defaultMapContainer" v-show="(tabbarSelect===2)">
-        <div class="cur-position"
-            v-if='curPositionShow'
-            @click="curPosition">
-        </div>
+        <div class="cur-position" v-if="curPositionShow" @click="curPosition"></div>
       </div>
       <van-collapse v-model="activeNames2" v-show="(tabbarSelect===2)">
         <van-collapse-item title="功能" name="1">
@@ -50,30 +43,41 @@
           />
         </van-collapse-item>
         <van-collapse-item title="案例" name="2">
-          <div class="demo-btn" @click="startUpdatingLocation">开启定位</div>
-          <div class="demo-btn" @click="showLocation">显示／隐藏定位按钮</div>
+          <van-row type="flex" justify="center" v-if="(this.mainActiveIndex===0) && (this.activeId===1)">
+            <van-radio-group v-model="lang">
+              <van-radio name="en" @click="changeLang">英文底图</van-radio>
+              <van-radio name="zh_en" @click="changeLang">中英文对照</van-radio>
+              <van-radio name="zh_cn" @click="changeLang">中文底图</van-radio>
+            </van-radio-group>
+          </van-row>
+          <van-row type="flex" justify="center" v-if="(this.mainActiveIndex===1) && (this.activeId===1)">
+            <van-col span="8">
+              <van-button type="info" size="small" @click="startUpdatingLocation">开启定位</van-button>
+            </van-col>
+            <van-col span="10">
+              <van-button type="info" size="small" @click="showLocation">显示/隐藏图标</van-button>
+            </van-col>
+          </van-row>
         </van-collapse-item>
-        <div class="btn-list">
-          <div class="demo-btn"
-                  @click="startUpdatingLocation">开启定位</div>
-          <div class="demo-btn"
-                  @click="stopLocation">结束定位</div> <br/>
-          <div class="demo-btn"
-                  @click="getToolBar">显示缩放工具条</div>
-          <!-- <div class="demo-btn"
-                  @click="curPositionShow = !curPositionShow">显示／隐藏定位按钮</div><br/> -->
-          <div class="demo-btn"
-                  @click="showLocation">显示／隐藏定位按钮</div><br/>
-          <div class="demo-btn"
-                  @click="setDemoPoint()">设置中心点</div>
-          <div class="demo-btn"
-                  @click="setMarker({longitude: 116.2312,latitude: 39.54,pointName: '测试地点'}, 1)">设置点标记</div><br/>
-          <div class="demo-btn"
-                  @click="setCircle(116.23, 39.54)">设置范围圈</div>
-          <div class="demo-btn"
-                @click="openInfoWindow">显示信息窗</div>
-        </div>
       </van-collapse>
+      <div class="btn-list">
+        <!-- <div class="demo-btn" @click="startUpdatingLocation">开启定位</div> -->
+        <!-- <div class="demo-btn" @click="stopLocation">结束定位</div> -->
+        <!-- <br /> -->
+        <div class="demo-btn" @click="getToolBar">显示缩放工具条</div>
+        <!-- <div class="demo-btn"
+        @click="curPositionShow = !curPositionShow">显示／隐藏定位按钮</div><br/>-->
+        <!-- <div class="demo-btn" @click="showLocation">显示／隐藏定位按钮</div> -->
+        <br />
+        <div class="demo-btn" @click="setDemoPoint()">设置中心点</div>
+        <div
+          class="demo-btn"
+          @click="setMarker({longitude: 116.2312,latitude: 39.54,pointName: '测试地点'}, 1)"
+        >设置点标记</div>
+        <br />
+        <div class="demo-btn" @click="setCircle(116.23, 39.54)">设置范围圈</div>
+        <div class="demo-btn" @click="openInfoWindow">显示信息窗</div>
+      </div>
       <tabbar v-model="tabbarSelect" :fixed="true" active-color="#07c160">
         <tabbar-item icon="description">文档</tabbar-item>
         <tabbar-item icon="search">搜索</tabbar-item>
@@ -87,40 +91,46 @@
 import MxHeader from '@/components/mx-header/index'
 import { Tabbar, TabbarItem } from 'vant'
 export default {
-  data () {
+  data() {
     return {
-      items: [{
-        text: '地图属性',
-        children: [
-          { text: '中/英文地图', id: 1 },
-          { text: '地图中心点', id: 2 },
-          { text: '当地行政区', id: 3 },
-          { text: '地图显示范围', id: 4 },
-          { text: '点击获取经纬度', id: 5 },
-          { text: '设置鼠标样式', id: 6 },
-          { text: '显示缩放工具条', id: 7 }]
-      },
-      {
-        text: '定位',
-        children: [
-          { text: '显示定位图标', id: 1 },
-          { text: 'IP城市定位', id: 2 },
-          { text: '浏览器精确定位', id: 3 }]
-      },
-      {
-        text: '服务',
-        children: [
-          { text: '定位', id: 1 },
-          { text: '天气预报', id: 2 },
-          { text: '行政区划查询', id: 3 }]
-      }],
+      items: [
+        {
+          text: '地图属性',
+          children: [
+            { text: '中/英文地图', id: 1 },
+            { text: '地图中心点', id: 2 },
+            { text: '当地行政区', id: 3 },
+            { text: '地图显示范围', id: 4 },
+            { text: '点击获取经纬度', id: 5 },
+            { text: '设置鼠标样式', id: 6 },
+            { text: '显示缩放工具条', id: 7 }
+          ]
+        },
+        {
+          text: '其他服务',
+          children: [
+            { text: '定位', id: 1 },
+            { text: '天气预报', id: 2 },
+            { text: '公交信息查询', id: 3 }
+          ]
+        },
+        {
+          text: '覆盖物',
+          children: [
+            { text: '点标记', id: 1 },
+            { text: '3D控制罗盘', id: 2 },
+            { text: '信息窗体', id: 3 }
+          ]
+        }
+      ],
       openLocationFlag: false, // 定位开启时为true
       mainActiveIndex: 0, // 左侧高亮元素的index
       activeId: 1, // 被选中元素的id
       activeNames0: ['10'],
       activeNames1: ['9'],
       activeNames2: ['1'],
-      tabbarSelect: 2,
+      lang: 'zh_cn', // 地图标注的语言类型
+      tabbarSelect: 2, // -------------------------------------------------
       mapObj: null,
       canLI: false,
       location: '',
@@ -137,16 +147,17 @@ export default {
   },
   components: {
     // Cell, Tab, Tabs, Tabbar, TabbarItem, mxLoadmore, MxHeader, noneTip
-    Tabbar, TabbarItem, MxHeader
+    Tabbar,
+    TabbarItem,
+    MxHeader
   },
   computed: {
     ...mapGetters({
       getLocation: 'getLocation'
     })
   },
-  mounted () {
+  mounted() {
     this.getMap()
-    // this.startUpdatingLocation()
   },
   methods: {
     onNavClick(index) {
@@ -159,11 +170,13 @@ export default {
     /**
      * 开启定位
      */
-    startUpdatingLocation () {
+    startUpdatingLocation() {
       if (!this.openLocationFlag) {
         let _self = this
-        this.mapObj.plugin('AMap.Geolocation', function () {
+        this.mapObj.plugin('AMap.Geolocation', function() {
           let geolocation = new AMap.Geolocation({
+            noIpLocate: 0, // 是否禁用IP定位：0（不禁用，默认值），1（手机设备禁用），2（PC设备禁用），3（所有设备都禁用）
+            noGeoLocation: 0, // 是否禁用浏览器定位：0（不禁用，默认值），1（手机设备禁用），2（PC设备禁用），3（所有设备都禁用）
             enableHighAccuracy: true, // 是否使用高精度定位，默认：true
             timeout: 10000, // 超过10秒后停止定位，默认：无穷大
             maximumAge: 0, // 定位结果缓存0毫秒，默认：0毫秒
@@ -189,17 +202,32 @@ export default {
     /**
      * 显示/隐藏定位图标
      */
-    showLocation () {
+    showLocation() {
       let countLocation = document.getElementsByClassName('amap-geo').length // 防止有多个定位控件的情况
-      do {
-        document.getElementsByClassName('amap-geo')[0].style.display = (document.getElementsByClassName('amap-geo')[0].style.display === 'none') ? 'block' : 'none'
-        countLocation--
-      } while (countLocation !== 0)
+      if (countLocation) {
+        do {
+          document.getElementsByClassName('amap-geo')[0].style.display = (document.getElementsByClassName('amap-geo')[0].style.display === 'none') ? 'block' : 'none'
+          countLocation--
+        } while (countLocation !== 0)
+      } else {
+        this.$toast('请先开启定位')
+      }
+    },
+    changeLang () {
+      this.mapObj.setLang(this.lang)
+      // let radios = document.querySelectorAll('#lang input')
+      // radios.forEach(function(ratio) {
+      //   ratio.onclick = setLang
+      // })
+      // let _self = this
+      // function setLang() {
+      //   _self.mapObj.setLang(this.id)
+      // }
     },
     /**
-     * 关闭定位
+     * 关闭定位 --------------------------------------------------------------------------------
      */
-    stopLocation () {
+    stopLocation() {
       if (this.$config.env === 'local') {
         if (this.timer) {
           clearInterval(this.timer)
@@ -214,7 +242,7 @@ export default {
     /**
      * 地图定位到当前中心点
      */
-    curPosition () {
+    curPosition() {
       if (this.getLocation) {
         this.selectPoint = null
         this.initcanLI(this.getLocation)
@@ -223,18 +251,18 @@ export default {
     /**
      * 设置定位
      */
-    initcanLI (newval) {
+    initcanLI(newval) {
       // 选中了点， 则停止定位到当前点，否则定位成功，回到当前点位中心点
       if (!this.selectPoint) {
         this.setPoint(newval.longitude, newval.latitude, newval.address)
       } else {
         // 如需实现以当前点位打卡点， 则执行下面逻辑后返回  如果始终保持计算最近点打卡，下面逻辑注释即可
-
       }
     },
-    getMap () {
+    getMap() {
       // AMap是高德地图的构造函数，这里.Map是创建地图，.Marker是创建坐标点
-      this.mapObj = new AMap.Map('defaultMapContainer', { // 未设置高德地图初始点，默认为北京的人民公园
+      this.mapObj = new AMap.Map('defaultMapContainer', {
+        // 未设置高德地图初始点，默认为北京的人民公园
         // 'defaultMapContainer'是对应页面盒子的id
         resizeEnable: true, // 自适应大小
         dragEnable: true,
@@ -256,9 +284,9 @@ export default {
     /**
      * 设置是否显示放大缩小按钮
      */
-    getToolBar () {
+    getToolBar() {
       let _self = this
-      this.mapObj.plugin(['AMap.ToolBar'], function () {
+      this.mapObj.plugin(['AMap.ToolBar'], function() {
         let toolBar = new AMap.ToolBar({
           position: 'LT', // 位置（LT:左上角）
           autoPosition: false // 自动定位
@@ -269,13 +297,22 @@ export default {
     /**
      * 设置窗体内容
      */
-    getInfoContent (item) {
+    getInfoContent(item) {
       // pointName radius latitude   longitude
       let infoWindow = document.createElement('div')
       let distance = -1
       let distanceStr = '--'
-      if (this.getLocation && this.getLocation.latitude && this.getLocation.longitude) {
-        distance = this.$service.calculateDistance(item.latitude, item.longitude, this.getLocation.latitude, this.getLocation.longitude)
+      if (
+        this.getLocation &&
+        this.getLocation.latitude &&
+        this.getLocation.longitude
+      ) {
+        distance = this.$service.calculateDistance(
+          item.latitude,
+          item.longitude,
+          this.getLocation.latitude,
+          this.getLocation.longitude
+        )
         if (distance >= 1000) {
           distanceStr = parseInt(distance / 1000, 10) + 'KM'
         } else {
@@ -284,20 +321,24 @@ export default {
       }
 
       infoWindow.className = 'marker-info'
-      infoWindow.innerHTML = '<div style="background: #FFFFFF;padding: 5px;border-radius: 5px;font-family: PingFangSC-Regular;"><p style="font-size: 14px;color: #21272B;">' +
-        item.pointName + '</p><div style="font-size: 12px;color: #919CA3;">距离: ' +
-        distanceStr + '</div></div>'
+      infoWindow.innerHTML =
+        '<div style="background: #FFFFFF;padding: 5px;border-radius: 5px;font-family: PingFangSC-Regular;"><p style="font-size: 14px;color: #21272B;">' +
+        item.pointName +
+        '</p><div style="font-size: 12px;color: #919CA3;">距离: ' +
+        distanceStr +
+        '</div></div>'
       return infoWindow
     },
     /**
      * 设置标志物
      */
-    setMarker (item, index) {
+    setMarker(item, index) {
       let _self = this
       let point = new AMap.LngLat(item.longitude, item.latitude)
       // 创建一个 Marker 实例：
       let marker = new AMap.Marker({
-        content: '<div class="icon-map-marker txt-white">' + (index + 1) + '</div>',
+        content:
+          '<div class="icon-map-marker txt-white">' + (index + 1) + '</div>',
         topWhenClick: true,
         clickable: true,
         position: point, // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
@@ -306,7 +347,7 @@ export default {
         extData: item
       })
 
-      AMap.event.addListener(marker, 'click', function (event) {
+      AMap.event.addListener(marker, 'click', function(event) {
         let data = event.target.getExtData()
         _self.selectPoint = data
         _self.initcanLI(_self.getLocation)
@@ -320,7 +361,7 @@ export default {
     /**
      * 设置范围圆圈
      */
-    setCircle (lang, lat) {
+    setCircle(lang, lat) {
       if (this.circle) {
         this.circle.setCenter(new AMap.LngLat(lang, lat))
       } else {
@@ -339,7 +380,7 @@ export default {
     /**
      * 设置中心点
      */
-    setPoint (lang, lat, address) {
+    setPoint(lang, lat, address) {
       // 创建一个 Marker 实例：
       let point = new AMap.LngLat(lang, lat)
 
@@ -362,19 +403,21 @@ export default {
       this.currentMarker.setMap(this.mapObj)
     },
     // ********测试内容****************
-    openInfoWindow () {
+    openInfoWindow() {
       // AMap.event.addListener(marker, 'click', function () { // 监听圆形标记的点击事件
       //   infoWindow.open(map, marker.getPosition()) // 信息窗体打开
       // })
-      this.infoWindow.setContent(this.getInfoContent({
-        longitude: 116.23,
-        latitude: 39.54,
-        pointName: '测试地点'
-      }))
+      this.infoWindow.setContent(
+        this.getInfoContent({
+          longitude: 116.23,
+          latitude: 39.54,
+          pointName: '测试地点'
+        })
+      )
 
       this.infoWindow.open(this.mapObj, [116.23, 39.54]) // 信息窗体打开
     },
-    setDemoPoint () {
+    setDemoPoint() {
       this.selectPoint = null
       this.$store.commit('updateLocation', {
         longitude: 116.23,
@@ -383,11 +426,12 @@ export default {
       })
     }
   },
-  updated () { // 滚动条位置的监听放到activated是因为此页面被keep-alive缓存了
+  updated() {
+    // 滚动条位置的监听放到activated是因为此页面被keep-alive缓存了
     // this.getMap()
   },
   watch: {
-    'getLocation': function (newval, oldval) {
+    getLocation: function(newval, oldval) {
       console.log('a', newval)
       // 根据获取的打开点记录，与获取到的定位进行比对，范围内则进行设置可以进行gps打卡
       this.setCircle(newval.longitude, newval.latitude)
@@ -401,7 +445,7 @@ export default {
   padding: 0.1rem 0.1rem;
   font-size: 16px;
   font-weight: bold;
-  background-color: #FAFAFA;
+  background-color: #fafafa;
 }
 .all-point {
   z-index: 10;
