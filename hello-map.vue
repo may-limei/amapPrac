@@ -44,10 +44,10 @@
         </van-collapse-item>
         <van-collapse-item title="案例" name="2">
           <van-row type="flex" justify="center" v-if="(this.mainActiveIndex===0) && (this.activeId===1)">
-            <van-radio-group v-model="lang">
-              <van-radio name="en" @click="changeLang">英文底图</van-radio>
+            <van-radio-group v-model="lang" style="display: flex;">
+              <van-radio name="en" @click="changeLang">英文</van-radio>
               <van-radio name="zh_en" @click="changeLang">中英文对照</van-radio>
-              <van-radio name="zh_cn" @click="changeLang">中文底图</van-radio>
+              <van-radio name="zh_cn" @click="changeLang">中文</van-radio>
             </van-radio-group>
           </van-row>
           <van-row type="flex" justify="center" v-if="(this.mainActiveIndex===1) && (this.activeId===1)">
