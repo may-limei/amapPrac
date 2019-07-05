@@ -183,7 +183,7 @@ export default {
         this.openLocationFlag = true
       } else {
         // 面包屑提示，已开启定位
-        console.log('已开启定位')
+        this.$toast('已开启定位')
       }
     },
     /**
