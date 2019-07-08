@@ -52,7 +52,10 @@
           </van-row>
           <van-row type="flex" justify="center" v-if="(this.mainActiveIndex===1) && (this.activeId===1)">
             <van-col span="8">
-              <van-button type="info" size="small" @click="startUpdatingLocation">开启定位</van-button>
+              <van-button type="info" size="small" @click="startLocation">开启定位</van-button>
+            </van-col>
+            <van-col span="8">
+              <van-button type="info" size="small" @click="stopLocation">关闭定位</van-button>
             </van-col>
             <van-col span="10">
               <van-button type="info" size="small" @click="showLocation">显示/隐藏图标</van-button>
@@ -61,7 +64,7 @@
         </van-collapse-item>
       </van-collapse>
       <div class="btn-list">
-        <!-- <div class="demo-btn" @click="startUpdatingLocation">开启定位</div> -->
+        <!-- <div class="demo-btn" @click="startLocation">开启定位</div> -->
         <!-- <div class="demo-btn" @click="stopLocation">结束定位</div> -->
         <!-- <br /> -->
         <div class="demo-btn" @click="getToolBar">显示缩放工具条</div>
@@ -123,7 +126,8 @@ export default {
           ]
         }
       ],
-      openLocationFlag: false, // 定位开启时为true
+      openLocationFlag: false, // 定位Flag，定位开启时为true
+      geolocation: null, // 定位控件,用于描述对定位控件的设置
       mainActiveIndex: 0, // 左侧高亮元素的index
       activeId: 1, // 被选中元素的id
       activeNames0: ['10'],
@@ -168,13 +172,15 @@ export default {
       this.activeNames2 = ['2']
     },
     /**
-     * 开启定位
+     * 开启定位，
+     * openLocationFlag为开启定位的标志位，
+     * geolocation为用于定位设置的全局对象
      */
-    startUpdatingLocation() {
+    startLocation() {
       if (!this.openLocationFlag) {
-        let _self = this
+        let _self = this // 后续可能在局部作用域使用全局this，故定义一个_self
         this.mapObj.plugin('AMap.Geolocation', function() {
-          let geolocation = new AMap.Geolocation({
+          _self.geolocation = new AMap.Geolocation({
             noIpLocate: 0, // 是否禁用IP定位：0（不禁用，默认值），1（手机设备禁用），2（PC设备禁用），3（所有设备都禁用）
             noGeoLocation: 0, // 是否禁用浏览器定位：0（不禁用，默认值），1（手机设备禁用），2（PC设备禁用），3（所有设备都禁用）
             enableHighAccuracy: true, // 是否使用高精度定位，默认：true
@@ -188,27 +194,48 @@ export default {
             panToLocation: true, // 定位成功后将定位到的位置作为地图中心点，默认：true
             zoomToAccuracy: false // 定位成功后调整地图视野范围，使定位位置及精度范围视野内可见，默认：false
           })
-          _self.mapObj.addControl(geolocation)
-          // geolocation.getCurrentPosition()
-          // AMap.event.addListener(geolocation, 'complete', onComplete) // 返回定位信息
-          // AMap.event.addListener(geolocation, 'error', onError) // 返回定位出错信息
         })
+        _self.mapObj.addControl(_self.geolocation) // 添加定位控件后，记得把openLocationFlag标志位置true
         this.openLocationFlag = true
+        this.$toast('定位已开启')
+        // geolocation.getCurrentPosition()
+        // AMap.event.addListener(geolocation, 'complete', onComplete) // 返回定位信息
+        // AMap.event.addListener(geolocation, 'error', onError) // 返回定位出错信息
       } else {
         // 面包屑提示，已开启定位
         this.$toast('已开启定位')
       }
     },
     /**
+     * 关闭定位
+     * openLocationFlag为开启定位的标志位，
+     * geolocation为用于定位设置的全局对象
+     */
+    stopLocation () {
+      if (this.openLocationFlag) {
+        this.mapObj.removeControl(this.geolocation) // 删除定位控件后，记得把openLocationFlag标志位置false
+        this.openLocationFlag = false
+        this.$toast('定位已关闭')
+      } else {
+        this.$toast('尚未开启定位')
+      }
+    },
+    /**
      * 显示/隐藏定位图标
      */
     showLocation() {
-      let countLocation = document.getElementsByClassName('amap-geo').length // 防止有多个定位控件的情况
-      if (countLocation) {
-        do {
-          document.getElementsByClassName('amap-geo')[0].style.display = (document.getElementsByClassName('amap-geo')[0].style.display === 'none') ? 'block' : 'none'
-          countLocation--
-        } while (countLocation !== 0)
+      // 如果没有openLocationFlag，则直接检测是否有amap-geo类，也可以检测是否开启定位
+      // let countLocation = document.getElementsByClassName('amap-geo').length // 防止有多个定位控件的情况
+      // if (countLocation) {
+      //   do {
+      //     document.getElementsByClassName('amap-geo')[0].style.display = (document.getElementsByClassName('amap-geo')[0].style.display === 'none') ? 'block' : 'none'
+      //     countLocation--
+      //   } while (countLocation !== 0)
+      // } else {
+      //   this.$toast('请先开启定位')
+      // }
+      if (this.openLocationFlag) {
+        document.getElementsByClassName('amap-geo')[0].style.display = (document.getElementsByClassName('amap-geo')[0].style.display === 'none') ? 'block' : 'none'
       } else {
         this.$toast('请先开启定位')
       }
@@ -227,18 +254,18 @@ export default {
     /**
      * 关闭定位 --------------------------------------------------------------------------------
      */
-    stopLocation() {
-      if (this.$config.env === 'local') {
-        if (this.timer) {
-          clearInterval(this.timer)
-        }
-      } else {
-        this.$nativeApi.stopUpdatingLocation().then(() => {
-          // 获取设备信息
-          this.$toast('结束定位……')
-        })
-      }
-    },
+    // stopLocation() {
+    //   if (this.$config.env === 'local') {
+    //     if (this.timer) {
+    //       clearInterval(this.timer)
+    //     }
+    //   } else {
+    //     this.$nativeApi.stopUpdatingLocation().then(() => {
+    //       // 获取设备信息
+    //       this.$toast('结束定位……')
+    //     })
+    //   }
+    // },
     /**
      * 地图定位到当前中心点
      */
