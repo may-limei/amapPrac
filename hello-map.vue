@@ -42,7 +42,15 @@
             @itemclick="onItemClick"
           />
         </van-collapse-item>
-        <van-collapse-item title="案例" name="2">
+        <van-collapse-item title="API" name="2">
+          <el-table :data="tableData" style="width: 100%">
+            <el-table-column fit prop="propName" label="属性名" width="120"></el-table-column>
+            <el-table-column prop="propType" label="属性值类型" width="120"></el-table-column>
+            <el-table-column prop="propDefault" label="默认值" width="120"></el-table-column>
+            <el-table-column prop="propDescription" label="描述" width="260"></el-table-column>
+          </el-table>
+        </van-collapse-item>
+        <van-collapse-item title="案例" name="3">
           <van-row type="flex" justify="center" v-if="(this.mainActiveIndex===0) && (this.activeId===1)">
             <van-radio-group v-model="lang" style="display: flex;">
               <van-radio name="en" @click="changeLang">英文</van-radio>
@@ -96,38 +104,66 @@ import { Tabbar, TabbarItem } from 'vant'
 export default {
   data() {
     return {
-      items: [
-        {
-          text: '地图属性',
-          children: [
-            { text: '中/英文地图', id: 1 },
-            { text: '地图中心点', id: 2 },
-            { text: '当地行政区', id: 3 },
-            { text: '地图显示范围', id: 4 },
-            { text: '点击获取经纬度', id: 5 },
-            { text: '设置鼠标样式', id: 6 },
-            { text: '显示缩放工具条', id: 7 }
-          ]
-        },
-        {
-          text: '其他服务',
-          children: [
-            { text: '定位', id: 1 },
-            { text: '天气预报', id: 2 },
-            { text: '公交信息查询', id: 3 }
-          ]
-        },
-        {
-          text: '覆盖物',
-          children: [
-            { text: '点标记', id: 1 },
-            { text: '3D控制罗盘', id: 2 },
-            { text: '信息窗体', id: 3 }
-          ]
-        }
-      ],
+      tableData: [{
+        propName: 'showButton',
+        propType: 'Boolean',
+        propDefault: 'true',
+        propDescription: '是否显示定位按钮'
+      }, {
+        propName: 'showButton',
+        propType: 'Boolean',
+        propDefault: 'true',
+        propDescription: '是否显示定位按钮'
+      }, {
+        propName: 'showButton',
+        propType: 'Boolean',
+        propDefault: 'true',
+        propDescription: '是否显示定位按钮'
+      }, {
+        propName: 'showButton',
+        propType: 'Boolean',
+        propDefault: 'true',
+        propDescription: '是否显示定位按钮'
+      }],
+      items: [{
+        text: '地图属性',
+        children: [
+          { text: '中/英文地图', id: 1 },
+          { text: '地图中心点', id: 2 },
+          { text: '当地行政区', id: 3 },
+          { text: '地图显示范围', id: 4 },
+          { text: '点击获取经纬度', id: 5 },
+          { text: '设置鼠标样式', id: 6 },
+          { text: '显示缩放工具条', id: 7 }]
+      }, {
+        text: '其他服务',
+        children: [
+          { text: '定位', id: 1 },
+          { text: '天气预报', id: 2 },
+          { text: '公交信息查询', id: 3 }]
+      }, {
+        text: '覆盖物',
+        children: [
+          { text: '点标记', id: 1 },
+          { text: '3D控制罗盘', id: 2 },
+          { text: '信息窗体', id: 3 }]
+      }],
       openLocationFlag: false, // 定位Flag，定位开启时为true
-      geolocation: null, // 定位控件,用于描述对定位控件的设置
+      geolocation: null, // 定位控件
+      geolocationArg: { // 定位控件参数
+        noIpLocate: 0, // 是否禁用IP定位：0（不禁用，默认值），1（手机设备禁用），2（PC设备禁用），3（所有设备都禁用）
+        noGeoLocation: 0, // 是否禁用浏览器定位：0（不禁用，默认值），1（手机设备禁用），2（PC设备禁用），3（所有设备都禁用）
+        enableHighAccuracy: true, // 是否使用高精度定位，默认：true
+        timeout: 10000, // 超过10秒后停止定位，默认：无穷大
+        maximumAge: 0, // 定位结果缓存0毫秒，默认：0毫秒
+        showButton: true, // 显示定位按钮，默认：true
+        buttonPosition: 'LB', // 定位按钮停靠位置，默认左下角
+        buttonOffset: new AMap.Pixel(10, 20), // 定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+        showMarker: true, // 定位成功后在定位到的位置显示点标记，默认：true
+        showCircle: false, // 定位成功后用圆圈表示定位精度范围，默认：true
+        panToLocation: true, // 定位成功后将定位到的位置作为地图中心点，默认：true
+        zoomToAccuracy: false // 定位成功后调整地图视野范围，使定位位置及精度范围视野内可见，默认：false
+      },
       mainActiveIndex: 0, // 左侧高亮元素的index
       activeId: 1, // 被选中元素的id
       activeNames0: ['10'],
@@ -169,7 +205,7 @@ export default {
     },
     onItemClick(data) {
       this.activeId = data.id
-      this.activeNames2 = ['2']
+      this.activeNames2 = ['3']
     },
     /**
      * 开启定位，
@@ -180,20 +216,21 @@ export default {
       if (!this.openLocationFlag) {
         let _self = this // 后续可能在局部作用域使用全局this，故定义一个_self
         this.mapObj.plugin('AMap.Geolocation', function() {
-          _self.geolocation = new AMap.Geolocation({
-            noIpLocate: 0, // 是否禁用IP定位：0（不禁用，默认值），1（手机设备禁用），2（PC设备禁用），3（所有设备都禁用）
-            noGeoLocation: 0, // 是否禁用浏览器定位：0（不禁用，默认值），1（手机设备禁用），2（PC设备禁用），3（所有设备都禁用）
-            enableHighAccuracy: true, // 是否使用高精度定位，默认：true
-            timeout: 10000, // 超过10秒后停止定位，默认：无穷大
-            maximumAge: 0, // 定位结果缓存0毫秒，默认：0毫秒
-            showButton: true, // 显示定位按钮，默认：true
-            buttonPosition: 'LB', // 定位按钮停靠位置，默认左下角
-            buttonOffset: new AMap.Pixel(10, 20), // 定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
-            showMarker: true, // 定位成功后在定位到的位置显示点标记，默认：true
-            showCircle: false, // 定位成功后用圆圈表示定位精度范围，默认：true
-            panToLocation: true, // 定位成功后将定位到的位置作为地图中心点，默认：true
-            zoomToAccuracy: false // 定位成功后调整地图视野范围，使定位位置及精度范围视野内可见，默认：false
-          })
+          // _self.geolocation = new AMap.Geolocation({
+          //   noIpLocate: 0, // 是否禁用IP定位：0（不禁用，默认值），1（手机设备禁用），2（PC设备禁用），3（所有设备都禁用）
+          //   noGeoLocation: 0, // 是否禁用浏览器定位：0（不禁用，默认值），1（手机设备禁用），2（PC设备禁用），3（所有设备都禁用）
+          //   enableHighAccuracy: true, // 是否使用高精度定位，默认：true
+          //   timeout: 10000, // 超过10秒后停止定位，默认：无穷大
+          //   maximumAge: 0, // 定位结果缓存0毫秒，默认：0毫秒
+          //   showButton: true, // 显示定位按钮，默认：true
+          //   buttonPosition: 'LB', // 定位按钮停靠位置，默认左下角
+          //   buttonOffset: new AMap.Pixel(10, 20), // 定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+          //   showMarker: true, // 定位成功后在定位到的位置显示点标记，默认：true
+          //   showCircle: false, // 定位成功后用圆圈表示定位精度范围，默认：true
+          //   panToLocation: true, // 定位成功后将定位到的位置作为地图中心点，默认：true
+          //   zoomToAccuracy: false // 定位成功后调整地图视野范围，使定位位置及精度范围视野内可见，默认：false
+          // })
+          _self.geolocation = new AMap.Geolocation(_self.geolocationArg)
         })
         _self.mapObj.addControl(_self.geolocation) // 添加定位控件后，记得把openLocationFlag标志位置true
         this.openLocationFlag = true
@@ -235,21 +272,19 @@ export default {
       //   this.$toast('请先开启定位')
       // }
       if (this.openLocationFlag) {
-        document.getElementsByClassName('amap-geo')[0].style.display = (document.getElementsByClassName('amap-geo')[0].style.display === 'none') ? 'block' : 'none'
+        this.mapObj.removeControl(this.geolocation) // 删除定位控件后，记得把openLocationFlag标志位置false
+        this.openLocationFlag = false
+        this.geolocationArg.showButton = !this.geolocationArg.showButton
+        this.geolocation = new AMap.Geolocation(this.geolocationArg)
+        this.mapObj.addControl(this.geolocation) // 添加定位控件后，记得把openLocationFlag标志位置true
+        this.openLocationFlag = true
+        // document.getElementsByClassName('amap-geo')[0].style.display = (document.getElementsByClassName('amap-geo')[0].style.display === 'none') ? 'block' : 'none'
       } else {
         this.$toast('请先开启定位')
       }
     },
     changeLang () {
       this.mapObj.setLang(this.lang)
-      // let radios = document.querySelectorAll('#lang input')
-      // radios.forEach(function(ratio) {
-      //   ratio.onclick = setLang
-      // })
-      // let _self = this
-      // function setLang() {
-      //   _self.mapObj.setLang(this.id)
-      // }
     },
     /**
      * 关闭定位 --------------------------------------------------------------------------------
