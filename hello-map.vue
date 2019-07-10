@@ -69,6 +69,32 @@
               <van-button type="info" size="small" @click="showLocation">显示/隐藏图标</van-button>
             </van-col>
           </van-row>
+          <van-row>
+            <van-col span="8">
+              <el-radio-group v-model="btnPos" @change="setBtnPos">
+                <el-radio :label="0">左下角</el-radio>
+                <el-radio :label="1">右下角</el-radio>
+                <el-radio :label="2">右上角</el-radio>
+                <el-radio :label="3">左上角</el-radio>
+              </el-radio-group>
+              <!-- <van-radio-group v-model="btnPos" @change="setBtnPos">
+                <van-radio name="0">左下角</van-radio>
+                <van-radio name="1">右下角</van-radio>
+                <van-radio name="2">左上角</van-radio>
+                <van-radio name="3">右上角</van-radio>
+              </van-radio-group> -->
+            </van-col>
+            <van-col span="12">
+              <!-- <van-cell-group>
+                <van-field v-model="btnOffsetX" label="偏移量x" type="textarea" placeholder="请输入定位按钮的偏移坐标x" rows="1" autosize/>
+              </van-cell-group>
+              <van-cell-group>
+                <van-field v-model="btnOffsetY" label="偏移量y" type="textarea" placeholder="请输入定位按钮的偏移坐标y" rows="1" autosize/>
+              </van-cell-group> -->
+              <van-stepper v-model="btnOffsetX" step="0.1" @change="setBtnPos"/><!--@change时setBtnPos()未执行，stepper的宽度待改-->
+              <van-stepper v-model="btnOffsetY" step="0.1" @change="setBtnPos"/>
+            </van-col>
+          </van-row>
         </van-collapse-item>
       </van-collapse>
       <div class="btn-list">
@@ -158,7 +184,7 @@ export default {
         maximumAge: 0, // 定位结果缓存0毫秒，默认：0毫秒
         showButton: true, // 显示定位按钮，默认：true
         buttonPosition: 'LB', // 定位按钮停靠位置，默认左下角
-        buttonOffset: new AMap.Pixel(10, 20), // 定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+        buttonOffset: null, // new AMap.Pixel(10, 20), // 定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
         showMarker: true, // 定位成功后在定位到的位置显示点标记，默认：true
         showCircle: false, // 定位成功后用圆圈表示定位精度范围，默认：true
         panToLocation: true, // 定位成功后将定位到的位置作为地图中心点，默认：true
@@ -170,6 +196,9 @@ export default {
       activeNames1: ['9'],
       activeNames2: ['1'],
       lang: 'zh_cn', // 地图标注的语言类型
+      btnPos: 9,
+      btnOffsetX: 0, // 定位按钮的偏移坐标x
+      btnOffsetY: 0, // 定位按钮的偏移坐标y
       tabbarSelect: 2, // -------------------------------------------------
       mapObj: null,
       canLI: false,
@@ -215,21 +244,8 @@ export default {
     startLocation() {
       if (!this.openLocationFlag) {
         let _self = this // 后续可能在局部作用域使用全局this，故定义一个_self
+        this.geolocationArg.buttonOffset = new AMap.Pixel(this.btnOffsetX, this.btnOffsetY)
         this.mapObj.plugin('AMap.Geolocation', function() {
-          // _self.geolocation = new AMap.Geolocation({
-          //   noIpLocate: 0, // 是否禁用IP定位：0（不禁用，默认值），1（手机设备禁用），2（PC设备禁用），3（所有设备都禁用）
-          //   noGeoLocation: 0, // 是否禁用浏览器定位：0（不禁用，默认值），1（手机设备禁用），2（PC设备禁用），3（所有设备都禁用）
-          //   enableHighAccuracy: true, // 是否使用高精度定位，默认：true
-          //   timeout: 10000, // 超过10秒后停止定位，默认：无穷大
-          //   maximumAge: 0, // 定位结果缓存0毫秒，默认：0毫秒
-          //   showButton: true, // 显示定位按钮，默认：true
-          //   buttonPosition: 'LB', // 定位按钮停靠位置，默认左下角
-          //   buttonOffset: new AMap.Pixel(10, 20), // 定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
-          //   showMarker: true, // 定位成功后在定位到的位置显示点标记，默认：true
-          //   showCircle: false, // 定位成功后用圆圈表示定位精度范围，默认：true
-          //   panToLocation: true, // 定位成功后将定位到的位置作为地图中心点，默认：true
-          //   zoomToAccuracy: false // 定位成功后调整地图视野范围，使定位位置及精度范围视野内可见，默认：false
-          // })
           _self.geolocation = new AMap.Geolocation(_self.geolocationArg)
         })
         _self.mapObj.addControl(_self.geolocation) // 添加定位控件后，记得把openLocationFlag标志位置true
@@ -249,6 +265,16 @@ export default {
      * geolocation为用于定位设置的全局对象
      */
     stopLocation () {
+      // if (this.$config.env === 'local') {
+      //   if (this.timer) {
+      //     clearInterval(this.timer)
+      //   }
+      // } else {
+      //   this.$nativeApi.stopUpdatingLocation().then(() => { // 涉及cordova获取本机设备信息
+      //     // 获取设备信息
+      //     this.$toast('结束定位……')
+      //   })
+      // }
       if (this.openLocationFlag) {
         this.mapObj.removeControl(this.geolocation) // 删除定位控件后，记得把openLocationFlag标志位置false
         this.openLocationFlag = false
@@ -261,23 +287,17 @@ export default {
      * 显示/隐藏定位图标
      */
     showLocation() {
-      // 如果没有openLocationFlag，则直接检测是否有amap-geo类，也可以检测是否开启定位
-      // let countLocation = document.getElementsByClassName('amap-geo').length // 防止有多个定位控件的情况
-      // if (countLocation) {
-      //   do {
-      //     document.getElementsByClassName('amap-geo')[0].style.display = (document.getElementsByClassName('amap-geo')[0].style.display === 'none') ? 'block' : 'none'
-      //     countLocation--
-      //   } while (countLocation !== 0)
-      // } else {
-      //   this.$toast('请先开启定位')
-      // }
       if (this.openLocationFlag) {
         this.mapObj.removeControl(this.geolocation) // 删除定位控件后，记得把openLocationFlag标志位置false
         this.openLocationFlag = false
+        // ？？？removeControl后，是否将this.geolocation的内存删掉了？或者后续垃圾回收时自动清除？
+        // ？？？如果没有删除，那么每次切换显示/隐藏定位图标时产生很多垃圾（因为每次从隐藏到显示，都用newAMap.Geolocation开辟了一段内存）
+        this.geolocationArg.buttonOffset = new AMap.Pixel(this.btnOffsetX, this.btnOffsetY)
         this.geolocationArg.showButton = !this.geolocationArg.showButton
         this.geolocation = new AMap.Geolocation(this.geolocationArg)
         this.mapObj.addControl(this.geolocation) // 添加定位控件后，记得把openLocationFlag标志位置true
         this.openLocationFlag = true
+        // 定位图标的class名为amap-geo
         // document.getElementsByClassName('amap-geo')[0].style.display = (document.getElementsByClassName('amap-geo')[0].style.display === 'none') ? 'block' : 'none'
       } else {
         this.$toast('请先开启定位')
@@ -286,21 +306,6 @@ export default {
     changeLang () {
       this.mapObj.setLang(this.lang)
     },
-    /**
-     * 关闭定位 --------------------------------------------------------------------------------
-     */
-    // stopLocation() {
-    //   if (this.$config.env === 'local') {
-    //     if (this.timer) {
-    //       clearInterval(this.timer)
-    //     }
-    //   } else {
-    //     this.$nativeApi.stopUpdatingLocation().then(() => {
-    //       // 获取设备信息
-    //       this.$toast('结束定位……')
-    //     })
-    //   }
-    // },
     /**
      * 地图定位到当前中心点
      */
@@ -319,6 +324,35 @@ export default {
         this.setPoint(newval.longitude, newval.latitude, newval.address)
       } else {
         // 如需实现以当前点位打卡点， 则执行下面逻辑后返回  如果始终保持计算最近点打卡，下面逻辑注释即可
+      }
+    },
+    /**
+     * 定位按钮的位置
+     */
+    setBtnPos() {
+      if (this.openLocationFlag) {
+        this.mapObj.removeControl(this.geolocation) // 删除定位控件后，记得把openLocationFlag标志位置false
+        this.openLocationFlag = false
+        switch (this.btnPos) {
+          case 0:
+            this.geolocationArg.buttonPosition = 'LB'
+            break
+          case 1:
+            this.geolocationArg.buttonPosition = 'RB'
+            break
+          case 2:
+            this.geolocationArg.buttonPosition = 'RT'
+            break
+          case 3:
+            this.geolocationArg.buttonPosition = 'LT'
+            break
+        }
+        this.buttonOffset = new AMap.Pixel(this.btnOffsetX, this.btnOffsetY)
+        this.geolocation = new AMap.Geolocation(this.geolocationArg)
+        this.mapObj.addControl(this.geolocation) // 添加定位控件后，记得把openLocationFlag标志位置true
+        this.openLocationFlag = true
+      } else {
+        this.$toast('请先开启定位')
       }
     },
     getMap() {
@@ -486,6 +520,7 @@ export default {
         latitude: 39.54,
         pointName: '示例地点'
       })
+      console.log('this.getLocation:' + this.getLocation.latitude.toString())
     }
   },
   updated() {
